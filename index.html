@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Board</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- New Message Form -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Post a New Message</h2>
+                <form id="messageForm">
+                    <div class="mb-3">
+                        <label for="messageTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="messageTitle" placeholder="Enter message title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageContent" class="form-label">Message</label>
+                        <textarea class="form-control" id="messageContent" rows="3" placeholder="Enter your message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Messages List -->
+        <div class="row">
+            <div class="col">
+                <h2>Messages</h2>
+                <ul class="list-group" id="messagesList">
+                    <!-- Messages will be dynamically inserted here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <script>
+        async function postThenGet(title, content) {
+            try {
+                // Data to send in the POST request
+                const postData = {
+                    'title': title, 
+                    'content': content 
+                };
+
+                // Send the POST request
+                const postResponse = await fetch('http://127.0.0.1:2000/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                if (!postResponse.ok) {
+                    throw new Error('POST request failed');
+                }
+
+                console.log('POST request successful');
+
+                // Send the GET request
+                const getResponse = await fetch('http://127.0.0.1:2000/messages');
+
+                if (!getResponse.ok) {
+                    throw new Error('GET request failed');
+                }
+
+                const data = await getResponse.json();
+                console.log('GET request successful');
+                return data;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        document.getElementById('messageForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Get the message title and content
+            const title = document.getElementById('messageTitle').value;
+            const content = document.getElementById('messageContent').value;
+            const data = await postThenGet(title, content);
+
+            const messagesList = document.getElementById('messagesList');
+            messagesList.innerHTML = '';
+
+            data.forEach(message => {
+                const messageItem = document.createElement('li');
+                messageItem.className = 'list-group-item';
+
+                const messageTitle = document.createElement('h5');
+                messageTitle.textContent = message.title;
+                messageItem.appendChild(messageTitle);
+
+                const messageContent = document.createElement('p');
+                messageContent.textContent = message.content;
+                messageItem.appendChild(messageContent);
+
+                messagesList.appendChild(messageItem);
+            });
+
+            document.getElementById('messageForm').reset();
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:2000/messages');
+                if (!response.ok) {
+                    throw new Error('GET request failed');
+                }
+                const data = await response.json();
+                const messagesList = document.getElementById('messagesList');
+                messagesList.innerHTML = '';
+
+                data.forEach(message => {
+                    const messageItem = document.createElement('li');
+                    messageItem.className = 'list-group-item';
+
+                    const messageTitle = document.createElement('h5');
+                    messageTitle.textContent = message.title;
+                    messageItem.appendChild(messageTitle);
+
+                    const messageContent = document.createElement('p');
+                    messageContent.textContent = message.content;
+                    messageItem.appendChild(messageContent);
+
+                    messagesList.appendChild(messageItem);
+                });
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+
