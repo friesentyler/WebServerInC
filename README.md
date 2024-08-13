@@ -1,7 +1,7 @@
 # WebServerInC
 A very simple web server in C built using OS system calls.
 
-I've included both server code as well as compiled executable that works on Mac M1. If you would also like to run this code but compile your own version you can compile it using GCC. Just run the following command in the project directory.
+I've included both server code as well as a compiled executable that works on Mac M1. If you would also like to run this code but compile your own version you can compile it using GCC. Just run the following command in the project directory.
 
 ```gcc -o tcp_server tcp_server.c```
 
